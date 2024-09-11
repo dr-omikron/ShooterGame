@@ -24,9 +24,12 @@ AWeapon::AWeapon()
 	MuzzleFlash = nullptr;
 	FireSound = nullptr;
 	SlideDisplacement = 0.f;
-	SlideDisplacementTime = 0.1f;
-	bMovingClip = false;
+	SlideDisplacementTime = 0.2f;
+	bMovingSlide = false;
 	MaxSlideDisplacement = 4.f;
+	SlideDisplacementCurve = nullptr;
+	MaxRecoilRotation = 20.f;
+	RecoilRotation = 0.f;
 }
 
 void AWeapon::Tick(float DeltaSeconds)
@@ -161,6 +164,7 @@ void AWeapon::UpdateSlideDisplacement()
 		const float ElapsedTime = GetWorldTimerManager().GetTimerElapsed(SlideTimer);
 		const float CurveValue = SlideDisplacementCurve->GetFloatValue(ElapsedTime);
 		SlideDisplacement = CurveValue * MaxSlideDisplacement;
+		RecoilRotation = CurveValue * MaxRecoilRotation;
 	}
 }
 
