@@ -111,11 +111,12 @@ public:
 	void DecrementAmmo();
 	void ReloadAmmo(int32 Amount);
 	bool ClipIsFull() const;
-	void FinishMovingSlide();
 	void StartSlideTimer();
 	
 protected:
 	void StopFalling();
+	void FinishMovingSlide();
+	void UpdateSlideDisplacement();
 	virtual void OnConstruction(const FTransform& Transform) override;
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))

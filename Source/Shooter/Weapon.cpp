@@ -37,6 +37,7 @@ void AWeapon::Tick(float DeltaSeconds)
 		const FRotator MeshRotation(0.f, GetItemMesh()->GetComponentRotation().Yaw, 0.f);
 		GetItemMesh()->SetWorldRotation(MeshRotation, false, nullptr, ETeleportType::TeleportPhysics);
 	}
+	UpdateSlideDisplacement();
 }
 
 void AWeapon::BeginPlay()
@@ -151,6 +152,16 @@ bool AWeapon::ClipIsFull() const
 void AWeapon::FinishMovingSlide()
 {
 	bMovingClip = false;
+}
+
+void AWeapon::UpdateSlideDisplacement()
+{
+	if(SlideDisplacementCurve && bMovingSlide)
+	{
+		const float ElapsedTime = GetWorldTimerManager().GetTimerElapsed(SlideTimer);
+		const float CurveValue = SlideDisplacementCurve->GetFloatValue(ElapsedTime);
+		SlideDisplacement = CurveValue * MaxSlideDisplacement;
+	}
 }
 
 void AWeapon::StartSlideTimer()
