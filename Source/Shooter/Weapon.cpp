@@ -23,6 +23,7 @@ AWeapon::AWeapon()
 	AutoFireRate = 0.08f;
 	MuzzleFlash = nullptr;
 	FireSound = nullptr;
+	SlideDisplacement = 0.f;
 }
 
 void AWeapon::Tick(float DeltaSeconds)
