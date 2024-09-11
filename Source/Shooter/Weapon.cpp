@@ -24,6 +24,9 @@ AWeapon::AWeapon()
 	MuzzleFlash = nullptr;
 	FireSound = nullptr;
 	SlideDisplacement = 0.f;
+	SlideDisplacementTime = 0.1f;
+	bMovingClip = false;
+	MaxSlideDisplacement = 4.f;
 }
 
 void AWeapon::Tick(float DeltaSeconds)
@@ -143,6 +146,17 @@ void AWeapon::ReloadAmmo(const int32 Amount)
 bool AWeapon::ClipIsFull() const
 {
 	return Ammo >= MagazineCapacity;
+}
+
+void AWeapon::FinishMovingSlide()
+{
+	bMovingClip = false;
+}
+
+void AWeapon::StartSlideTimer()
+{
+	bMovingSlide = true;
+	GetWorldTimerManager().SetTimer(SlideTimer, this, &AWeapon::FinishMovingSlide, SlideDisplacementTime);
 }
 
 void AWeapon::StopFalling()

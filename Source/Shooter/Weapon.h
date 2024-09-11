@@ -111,6 +111,8 @@ public:
 	void DecrementAmmo();
 	void ReloadAmmo(int32 Amount);
 	bool ClipIsFull() const;
+	void FinishMovingSlide();
+	void StartSlideTimer();
 	
 protected:
 	void StopFalling();
@@ -172,9 +174,17 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pistol", meta = (AllowPrivateAccess = "true"))
 	UCurveFloat* SlideDisplacementCurve;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Pistol", meta = (AllowPrivateAccess = "true"))
+	bool bMovingSlide;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pistol", meta = (AllowPrivateAccess = "true"))
+	float MaxSlideDisplacement;
 	
 	FTimerHandle ThrowWeaponTimer;
+	FTimerHandle SlideTimer;
 	float ThrowWeaponTime;
+	float SlideDisplacementTime;
 	bool bFalling;
 	int32 PreviousMaterialIndex;
 	
