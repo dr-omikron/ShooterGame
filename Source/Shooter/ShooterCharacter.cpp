@@ -241,7 +241,7 @@ bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, 
 void AShooterCharacter::AimingButtonPressed()
 {
 	bAimingButtonPressed = true;
-	if(CombatStates != ECombatStates::ECS_Reloading)
+	if(CombatStates != ECombatStates::ECS_Reloading && CombatStates != ECombatStates::ECS_Equipping)
 	{
 		Aim();
 	}
@@ -320,6 +320,7 @@ void AShooterCharacter::FinishReloading()
 void AShooterCharacter::FinishEquipping()
 {
 	CombatStates = ECombatStates::ECS_Unoccupied;
+	if(bAimingButtonPressed) Aim();
 }
 
 void AShooterCharacter::GrabClip()
@@ -717,10 +718,15 @@ void AShooterCharacter::ResetEquipSoundTimer()
 
 void AShooterCharacter::ExchangeInventoryItems(const int32 CurrentItemIndex, const int32 NewItemIndex)
 {
-	if(CurrentItemIndex != NewItemIndex &&
+	const bool bCanExchangeItems = CurrentItemIndex != NewItemIndex &&
 		NewItemIndex < Inventory.Num() &&
-		CombatStates == ECombatStates::ECS_Unoccupied || CombatStates == ECombatStates::ECS_Equipping)
+		CombatStates == ECombatStates::ECS_Unoccupied || CombatStates == ECombatStates::ECS_Equipping;
+	if(bCanExchangeItems)
 	{
+		if(bAiming)
+		{
+			StopAiming();
+		}
 		const auto OldEquippedWeapon = EquippedWeapon;
 		const auto NewWeapon = Cast<AWeapon>(Inventory[NewItemIndex]);
 		EquipWeapon(NewWeapon);
