@@ -278,9 +278,10 @@ void AShooterCharacter::FireButtonPressed()
 void AShooterCharacter::AutoFireReset()
 {
 	CombatStates = ECombatStates::ECS_Unoccupied;
+	if(EquippedWeapon == nullptr) return;
 	if(WeaponHasAmmo())
 	{
-		if(bFireButtonPressed)
+		if(bFireButtonPressed && EquippedWeapon->GetAutomatic())
 		{
 			FireWeapon();
 		}

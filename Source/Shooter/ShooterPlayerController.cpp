@@ -58,7 +58,7 @@ void AShooterPlayerController::SetupInputComponent()
 	EnhancedInputComponent->BindAction(IA_CameraAction, ETriggerEvent::Triggered, this, &AShooterPlayerController::CameraMovement);
 	EnhancedInputComponent->BindAction(IA_JumpAction, ETriggerEvent::Started, this, &AShooterPlayerController::Jump);
 	EnhancedInputComponent->BindAction(IA_JumpAction, ETriggerEvent::Completed, this, &AShooterPlayerController::StopJumping);
-	EnhancedInputComponent->BindAction(IA_FireAction, ETriggerEvent::Triggered, this, &AShooterPlayerController::FirePressed);
+	EnhancedInputComponent->BindAction(IA_FireAction, ETriggerEvent::Started, this, &AShooterPlayerController::FirePressed);
 	EnhancedInputComponent->BindAction(IA_FireAction, ETriggerEvent::Completed, this, &AShooterPlayerController::FireReleased);
 	EnhancedInputComponent->BindAction(IA_Aiming, ETriggerEvent::Started, this, &AShooterPlayerController::StartAiming);
 	EnhancedInputComponent->BindAction(IA_Aiming, ETriggerEvent::Completed, this, &AShooterPlayerController::StopAiming);

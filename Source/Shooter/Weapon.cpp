@@ -30,6 +30,7 @@ AWeapon::AWeapon()
 	SlideDisplacementCurve = nullptr;
 	MaxRecoilRotation = 20.f;
 	RecoilRotation = 0.f;
+	bAutomatic = true;
 }
 
 void AWeapon::Tick(float DeltaSeconds)
@@ -100,6 +101,7 @@ void AWeapon::OnConstruction(const FTransform& Transform)
 			MuzzleFlash = WeaponDataRow->MuzzleFlash;
 			FireSound = WeaponDataRow->FireSound;
 			BoneToHide = WeaponDataRow->BoneToHide;
+			bAutomatic = WeaponDataRow->bAutomatic;
 		}
 		if(GetMaterialInstance())
 		{
