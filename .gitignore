@@ -3,6 +3,7 @@ DerivedDataCache
 Intermediate
 Saved
 Platforms
+Content/A_Surface_Footstep/**
 Content/AnimStarterPack/**
 Content/Audio/**
 Content/Blueprints/**
@@ -10,10 +11,14 @@ Content/Collections/**
 Content/Developers/**
 Content/FPS_Weapon_Bundle/**
 Content/Fx/**
+Content/KiteDemo/**
+Content/Lighting/**
 Content/Maps/**
 Content/Materials/**
 Content/Meshes/**
 Content/ParagonLtBelica/**
+Content/ParagonProps/**
+Content/SampleMap/**
 Content/Sequences/**
 Content/Textures/**
 
