@@ -8,7 +8,8 @@ AEnemy::AEnemy():
 	ImpactParticle(nullptr),
 	ImpactSound(nullptr),
 	Health(100.f),
-	MaxHealth(100.f)
+	MaxHealth(100.f),
+	HealthBarDisplayTime(4.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -19,10 +20,15 @@ void AEnemy::BeginPlay()
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 }
 
+void AEnemy::ShowHealthBar_Implementation()
+{
+	GetWorldTimerManager().ClearTimer(HeathBarTimer);
+	GetWorldTimerManager().SetTimer(HeathBarTimer, this, &AEnemy::HideHealthBar, HealthBarDisplayTime);
+}
+
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -41,6 +47,7 @@ void AEnemy::BulletHit_Implementation(FHitResult HitResult)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, FRotator(0.f), true);
 	}
+	ShowHealthBar();
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
