@@ -2,6 +2,7 @@
 #include "ShooterCharacter.h"
 
 #include "Ammo.h"
+#include "BulletHitInterface.h"
 #include "ItemBase.h"
 #include "Weapon.h"
 #include "Camera/CameraComponent.h"
@@ -155,18 +156,28 @@ void AShooterCharacter::SendBullet() const
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EquippedWeapon->GetMuzzleFlash(), BarrelSocketTransform);
 		}
 
-		FVector BeamEnd;
-		if(GetBeamEndLocation(BarrelSocketTransform.GetLocation(), BeamEnd))
+		FHitResult BeamHitResult;
+		if(GetBeamEndLocation(BarrelSocketTransform.GetLocation(), BeamHitResult))
 		{
-			if(ImpactFlash)
+			if(BeamHitResult.GetActor())
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactFlash, BeamEnd);
+				if(IBulletHitInterface* BulletHitInterface = Cast<IBulletHitInterface>(BeamHitResult.GetActor()))
+				{
+					BulletHitInterface->BulletHit_Implementation(BeamHitResult);
+				}
+			}
+			else
+			{
+				if(ImpactFlash)
+				{
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactFlash, BeamHitResult.Location);
+				}
 			}
 			if(BeamParticles)
 			{
 				if(UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticles, BarrelSocketTransform.GetLocation()))
 				{
-					Beam->SetVectorParameter(FName("Target"), BeamEnd);
+					Beam->SetVectorParameter(FName("Target"), BeamHitResult.Location);
 				}
 			}
 		}
@@ -218,24 +229,24 @@ void AShooterCharacter::StartFireTimer()
 	GetWorldTimerManager().SetTimer(AutoFireTimer, this, &AShooterCharacter::AutoFireReset, EquippedWeapon->GetAutoFireRate());
 }
 
-bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation) const
+bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, FHitResult& OutHitResult) const
 {
+	FVector OutBeamLocation;
 	FHitResult CrosshairHitResult;
 	if(TraceUnderCrosshair(CrosshairHitResult, OutBeamLocation))
 	{
 		OutBeamLocation = CrosshairHitResult.Location;
 	}
-	FHitResult WeaponTraceHit;
 	const FVector WeaponTraceStart(MuzzleSocketLocation);
 	const FVector StartToEnd(OutBeamLocation - MuzzleSocketLocation);
 	const FVector WeaponTraceEnd(MuzzleSocketLocation + StartToEnd + 1.25f);
-	GetWorld()->LineTraceSingleByChannel(WeaponTraceHit, WeaponTraceStart, WeaponTraceEnd, ECC_Visibility);
-	if(WeaponTraceHit.bBlockingHit)
+	GetWorld()->LineTraceSingleByChannel(OutHitResult, WeaponTraceStart, WeaponTraceEnd, ECC_Visibility);
+	if(!OutHitResult.bBlockingHit)
 	{
-		OutBeamLocation = WeaponTraceHit.Location;
-		return true;
+		OutHitResult.Location = OutBeamLocation;
+		return false;
 	}
-	return false;
+	return true;
 }
 
 void AShooterCharacter::AimingButtonPressed()

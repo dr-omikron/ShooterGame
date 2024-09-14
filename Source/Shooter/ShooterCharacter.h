@@ -65,7 +65,7 @@ public:
 	float GetCrosshairSpreadMultiplayer() const { return CrosshairSpreadMultiplayer; }
 	//FVector GetCameraInterpLocation() const;
 	void FireWeapon();
-	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation) const;
+	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FHitResult& OutHitResult) const;
 	void AimingButtonPressed();
 	void AimingButtonReleased();
 	void FireButtonPressed();  
