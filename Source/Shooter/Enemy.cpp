@@ -6,10 +6,14 @@
 
 AEnemy::AEnemy():
 	ImpactParticle(nullptr),
+	HitMontage(nullptr),
 	ImpactSound(nullptr),
 	Health(100.f),
 	MaxHealth(100.f),
-	HealthBarDisplayTime(4.f)
+	HealthBarDisplayTime(4.f),
+	HitReactTimeMin(0.5f),
+	HitReactTimeMax(3.f),
+	bCanHitReact(true)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -19,13 +23,24 @@ void AEnemy::Die()
 	HideHealthBar();
 }
 
-void AEnemy::PlayHitMontage(FName Section, float PlayRate) const
+void AEnemy::PlayHitMontage(FName Section, float PlayRate)
 {
-	if(UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	if(bCanHitReact)
 	{
-		AnimInstance->Montage_Play(HitMontage, PlayRate);
-		AnimInstance->Montage_JumpToSection(Section, HitMontage);
+		if(UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+		{
+			AnimInstance->Montage_Play(HitMontage, PlayRate);
+			AnimInstance->Montage_JumpToSection(Section, HitMontage);
+		}
+		bCanHitReact = false;
+		const float HitReactTime = FMath::FRandRange(HitReactTimeMin, HitReactTimeMax);
+		GetWorldTimerManager().SetTimer(HitReactTimer, this, &AEnemy::ResetHitReactTimer, HitReactTime);
 	}
+}
+
+void AEnemy::ResetHitReactTimer()
+{
+	bCanHitReact = true;
 }
 
 void AEnemy::BeginPlay()

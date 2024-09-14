@@ -33,7 +33,8 @@ protected:
 	void HideHealthBar();
 
 	void Die();
-	void PlayHitMontage(FName Section, float PlayRate = 1.f) const;
+	void PlayHitMontage(FName Section, float PlayRate = 1.f);
+	void ResetHitReactTimer();
 	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
@@ -56,6 +57,14 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float HealthBarDisplayTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float HitReactTimeMin;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float HitReactTimeMax;
 	
+	bool bCanHitReact;
 	FTimerHandle HeathBarTimer;
+	FTimerHandle HitReactTimer;
 };
