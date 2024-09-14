@@ -22,6 +22,9 @@ public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	FORCEINLINE FString GetHeadName() const { return HeadBone; }
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowHitNumber(int32 Damage, FVector HitLocation);
 		
 protected:
 	virtual void BeginPlay() override;
@@ -32,9 +35,15 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void HideHealthBar();
 
+	UFUNCTION(BlueprintCallable)
+	void StoreHitNumber(UUserWidget* HitNumber, FVector Location);
+
 	void Die();
 	void PlayHitMontage(FName Section, float PlayRate = 1.f);
 	void ResetHitReactTimer();
+	UFUNCTION()
+	void DestroyHitNumber(UUserWidget* HitNumber);
+	void UpdateHitNumbers();
 	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
@@ -63,6 +72,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float HitReactTimeMax;
+
+	UPROPERTY(VisibleAnywhere, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	TMap<UUserWidget*, FVector> HitNumbers;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float HitNumberDestroyTime;
 	
 	bool bCanHitReact;
 	FTimerHandle HeathBarTimer;

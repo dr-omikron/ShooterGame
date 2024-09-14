@@ -1,6 +1,7 @@
 
 #include "Enemy.h"
 
+#include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 
@@ -13,9 +14,19 @@ AEnemy::AEnemy():
 	HealthBarDisplayTime(4.f),
 	HitReactTimeMin(0.5f),
 	HitReactTimeMax(3.f),
+	HitNumberDestroyTime(1.5f),
 	bCanHitReact(true)
 {
 	PrimaryActorTick.bCanEverTick = true;
+}
+
+void AEnemy::StoreHitNumber(UUserWidget* HitNumber, const FVector Location)
+{
+	HitNumbers.Add(HitNumber, Location);
+	FTimerHandle HitNumberTimer;
+	FTimerDelegate HitNumberDelegate;
+	HitNumberDelegate.BindUFunction(this, FName("DestroyHitNumber"), HitNumber);
+	GetWorldTimerManager().SetTimer(HitNumberTimer, HitNumberDelegate, HitNumberDestroyTime, false);
 }
 
 void AEnemy::Die()
@@ -43,6 +54,24 @@ void AEnemy::ResetHitReactTimer()
 	bCanHitReact = true;
 }
 
+void AEnemy::DestroyHitNumber(UUserWidget* HitNumber)
+{
+	HitNumbers.Remove(HitNumber);
+	HitNumber->RemoveFromParent();
+}
+
+void AEnemy::UpdateHitNumbers()
+{
+	for(const auto& HitPair : HitNumbers)
+	{
+		UUserWidget* HitNumber = HitPair.Key;
+		const FVector Location = HitPair.Value;
+		FVector2D ScreenPosition(0.f);
+		UGameplayStatics::ProjectWorldToScreen(GetWorld()->GetFirstPlayerController(), Location, ScreenPosition);
+		HitNumber->SetPositionInViewport(ScreenPosition);
+	}
+}
+
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
@@ -58,6 +87,7 @@ void AEnemy::ShowHealthBar_Implementation()
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	UpdateHitNumbers();
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
