@@ -292,6 +292,17 @@ void AShooterCharacter::AutoFireReset()
 	}
 }
 
+EPhysicalSurface AShooterCharacter::GetSurfaceType()
+{
+	FHitResult HitResult;
+	const FVector Start = GetActorLocation();
+	const FVector End = Start + FVector(0.f, 0.f, -400.f);
+	FCollisionQueryParams QueryParams;
+	QueryParams.bReturnPhysicalMaterial = true;
+	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams);
+	return UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
+}
+
 void AShooterCharacter::FinishReloading()
 {
 	CombatStates = ECombatStates::ECS_Unoccupied;

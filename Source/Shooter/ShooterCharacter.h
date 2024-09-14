@@ -89,13 +89,16 @@ public:
 	void StartPickupSoundTimer();
 	void StartEquipSoundTimer();
 	void UnhighlightInventorySlot();
-	
+		
 protected:
 	UFUNCTION()
 	void FinishCrosshairBulletFire();
 
 	UFUNCTION()
 	void AutoFireReset();
+
+	UFUNCTION(BlueprintCallable)
+	EPhysicalSurface GetSurfaceType();
 
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
