@@ -22,6 +22,8 @@ public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	FORCEINLINE FString GetHeadName() const { return HeadBone; }
+
+	void Die();
 	
 protected:
 	virtual void BeginPlay() override;

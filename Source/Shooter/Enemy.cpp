@@ -14,6 +14,11 @@ AEnemy::AEnemy():
 	PrimaryActorTick.bCanEverTick = true;
 }
 
+void AEnemy::Die()
+{
+	HideHealthBar();
+}
+
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
@@ -58,6 +63,7 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	if(Health - DamageAmount <= 0.f)
 	{
 		Health = 0.f;
+		Die();
 	}
 	else
 	{
