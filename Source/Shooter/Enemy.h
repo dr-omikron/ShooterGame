@@ -24,7 +24,7 @@ public:
 	FORCEINLINE FString GetHeadName() const { return HeadBone; }
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void ShowHitNumber(int32 Damage, FVector HitLocation);
+	void ShowHitNumber(int32 Damage, FVector HitLocation, bool bHeadShot);
 		
 protected:
 	virtual void BeginPlay() override;
@@ -38,11 +38,12 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void StoreHitNumber(UUserWidget* HitNumber, FVector Location);
 
+	UFUNCTION()
+	void DestroyHitNumber(UUserWidget* HitNumber);
+	
 	void Die();
 	void PlayHitMontage(FName Section, float PlayRate = 1.f);
 	void ResetHitReactTimer();
-	UFUNCTION()
-	void DestroyHitNumber(UUserWidget* HitNumber);
 	void UpdateHitNumbers();
 	
 private:
