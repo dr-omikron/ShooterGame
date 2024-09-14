@@ -3,6 +3,7 @@
 
 #include "Ammo.h"
 #include "BulletHitInterface.h"
+#include "Enemy.h"
 #include "ItemBase.h"
 #include "Weapon.h"
 #include "Camera/CameraComponent.h"
@@ -164,6 +165,11 @@ void AShooterCharacter::SendBullet() const
 				if(IBulletHitInterface* BulletHitInterface = Cast<IBulletHitInterface>(BeamHitResult.GetActor()))
 				{
 					BulletHitInterface->BulletHit_Implementation(BeamHitResult);
+				}
+				if(AEnemy* HitEnemy = Cast<AEnemy>(BeamHitResult.GetActor()))
+				{
+					UGameplayStatics::ApplyDamage(BeamHitResult.GetActor(), EquippedWeapon->GetDamage(),
+					GetController(), UGameplayStatics::GetPlayerCharacter(GetWorld(), 0), UDamageType::StaticClass());
 				}
 			}
 			else

@@ -87,6 +87,12 @@ struct FWeaponDataTable : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bAutomatic = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Damage = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HeadShotDamage = 0.f;
 };
 
 UCLASS()
@@ -108,6 +114,8 @@ public:
 	FORCEINLINE UParticleSystem* GetMuzzleFlash() const { return MuzzleFlash; }
 	FORCEINLINE USoundCue* GetFireSound() const { return FireSound; }
 	FORCEINLINE bool GetAutomatic() const { return bAutomatic; }
+	FORCEINLINE float GetDamage() const { return Damage; }
+	FORCEINLINE float GetHeadShotDamage() const { return HeadShotDamage; }
 	
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
@@ -197,6 +205,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))
 	bool bAutomatic;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float Damage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float HeadShotDamage;
 	
 	FTimerHandle ThrowWeaponTimer;
 	FTimerHandle SlideTimer;

@@ -5,8 +5,10 @@
 #include "Sound/SoundCue.h"
 
 AEnemy::AEnemy():
-ImpactParticle(nullptr),
-ImpactSound(nullptr)
+	ImpactParticle(nullptr),
+	ImpactSound(nullptr),
+	Health(100.f),
+	MaxHealth(100.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -39,5 +41,22 @@ void AEnemy::BulletHit_Implementation(FHitResult HitResult)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, FRotator(0.f), true);
 	}
+}
+
+float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if(Health - DamageAmount <= 0.f)
+	{
+		Health = 0.f;
+	}
+	else
+	{
+		Health -= DamageAmount;
+	}
+	
+	return DamageAmount;
 }
 

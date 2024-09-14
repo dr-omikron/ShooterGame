@@ -5,8 +5,8 @@
 #include "Sound/SoundCue.h"
 
 AExplosive::AExplosive():
-ExplosionParticle(nullptr),
-ExplosionSound(nullptr)
+	ExplosionParticle(nullptr),
+	ExplosionSound(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }

@@ -29,5 +29,4 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	USoundCue* ExplosionSound;
 	
-
 };
