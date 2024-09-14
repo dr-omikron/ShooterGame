@@ -4,9 +4,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 
-AEnemy::AEnemy()
+AEnemy::AEnemy():
+ImpactParticle(nullptr),
+ImpactSound(nullptr)
 {
- 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 void AEnemy::BeginPlay()
@@ -37,6 +39,5 @@ void AEnemy::BulletHit_Implementation(FHitResult HitResult)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, FRotator(0.f), true);
 	}
-	
 }
 
