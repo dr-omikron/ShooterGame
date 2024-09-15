@@ -23,25 +23,31 @@ AEnemy::AEnemy():
 	BehaviorTree(nullptr),
 	bStunned(false),
 	StunChance(0.5f),
-	bCanHitReact(true)
+	bCanHitReact(true),
+	AttackMontage(nullptr),
+	AttackLFast(TEXT("AttackLFast")),
+	AttackRFast(TEXT("AttackRFast")),
+	AttackL(TEXT("AttackL")),
+	AttackR(TEXT("AttackR"))
 {
 	PrimaryActorTick.bCanEverTick = true;
 	AgroSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Agro Sphere"));
 	AgroSphere->SetupAttachment(GetRootComponent());
-}
-
-void AEnemy::SetStunned(const bool Stunned)
-{
-	bStunned = Stunned;
-	EnemyAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("Stunned"), bStunned);
+	CombatRangeSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Combat Range Sphere"));
+	CombatRangeSphere->SetupAttachment(GetRootComponent());
 }
 
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
 	AgroSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::AgroSphereOverlap);
+	CombatRangeSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::CombatRangeOverlap);
+	CombatRangeSphere->OnComponentEndOverlap.AddDynamic(this, &AEnemy::CombatRangeEndOverlap);
+
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	EnemyAIController = Cast<AEnemyAIController>(GetController());
+
 	if(EnemyAIController)
 	{
 		const FVector WorldPatrolPoint1 = UKismetMathLibrary::TransformLocation(GetActorTransform(), PatrolPoint1);
@@ -80,6 +86,35 @@ void AEnemy::AgroSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	}
 }
 
+void AEnemy::CombatRangeOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if(OtherActor == nullptr) return;
+	if(auto ShooterCharacter = Cast<AShooterCharacter>(OtherActor))
+	{
+		bInAttackRange = true;
+		if(EnemyAIController)
+		{
+			EnemyAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("InAttackRange"), bInAttackRange);
+		}
+	}
+}
+
+void AEnemy::CombatRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if(OtherActor == nullptr) return;
+	if(auto ShooterCharacter = Cast<AShooterCharacter>(OtherActor))
+	{
+		bInAttackRange = false;
+		if(EnemyAIController)
+		{
+			EnemyAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("InAttackRange"), bInAttackRange);
+		}
+	}
+	
+}
+
 void AEnemy::StoreHitNumber(UUserWidget* HitNumber, const FVector Location)
 {
 	HitNumbers.Add(HitNumber, Location);
@@ -93,7 +128,7 @@ void AEnemy::PlayHitMontage(const FName Section, const float PlayRate)
 {
 	if(bCanHitReact)
 	{
-		if(UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+		if(UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance(); AnimInstance && HitMontage)
 		{
 			AnimInstance->Montage_Play(HitMontage, PlayRate);
 			AnimInstance->Montage_JumpToSection(Section, HitMontage);
@@ -101,6 +136,21 @@ void AEnemy::PlayHitMontage(const FName Section, const float PlayRate)
 		bCanHitReact = false;
 		const float HitReactTime = FMath::FRandRange(HitReactTimeMin, HitReactTimeMax);
 		GetWorldTimerManager().SetTimer(HitReactTimer, this, &AEnemy::ResetHitReactTimer, HitReactTime);
+	}
+}
+
+void AEnemy::SetStunned(const bool Stunned)
+{
+	bStunned = Stunned;
+	EnemyAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("Stunned"), bStunned);
+}
+
+void AEnemy::PlayAttackMontage(const FName Section, const float PlayRate) const
+{
+	if(UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance(); AnimInstance && AttackMontage)
+	{
+		AnimInstance->Montage_Play(AttackMontage, PlayRate);
+		AnimInstance->Montage_JumpToSection(Section, AttackMontage);
 	}
 }
 
