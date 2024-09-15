@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
 
+class UBoxComponent;
 class USphereComponent;
 class AEnemyAIController;
 class UBehaviorTree;
@@ -66,6 +67,14 @@ protected:
 	void CombatRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		 int32 OtherBodyIndex);
 
+	UFUNCTION()	
+	void LeftWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+		 int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()	
+	void RightWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+		 int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
 	void Die();
 	void PlayHitMontage(FName Section, float PlayRate = 1.f);
 	void ResetHitReactTimer();
@@ -131,6 +140,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float StunChance;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* LeftWeaponCollision;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* RightWeaponCollision;
 
 	UPROPERTY()
 	AEnemyAIController* EnemyAIController;
