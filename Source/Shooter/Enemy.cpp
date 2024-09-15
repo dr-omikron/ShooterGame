@@ -15,6 +15,7 @@
 AEnemy::AEnemy():
 	ImpactParticle(nullptr),
 	HitMontage(nullptr),
+	AttackMontage(nullptr),
 	ImpactSound(nullptr),
 	Health(100.f),
 	MaxHealth(100.f),
@@ -25,12 +26,11 @@ AEnemy::AEnemy():
 	BehaviorTree(nullptr),
 	bStunned(false),
 	StunChance(0.5f),
-	bCanHitReact(true),
-	AttackMontage(nullptr),
 	AttackLFast(TEXT("AttackLFast")),
 	AttackRFast(TEXT("AttackRFast")),
 	AttackL(TEXT("AttackL")),
-	AttackR(TEXT("AttackR"))
+	AttackR(TEXT("AttackR")),
+	bCanHitReact(true)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	AgroSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Agro Sphere"));
@@ -96,8 +96,28 @@ void AEnemy::UpdateHitNumbers()
 	}
 }
 
+void AEnemy::ActivateRightWeapon() const
+{
+	RightWeaponCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+void AEnemy::DeactivateRightWeapon() const
+{
+	RightWeaponCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AEnemy::ActivateLeftWeapon() const
+{
+	LeftWeaponCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+void AEnemy::DeactivateLeftWeapon() const
+{
+	LeftWeaponCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
 void AEnemy::AgroSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if(OtherActor == nullptr) return;
 	if(const auto Character = Cast<AShooterCharacter>(OtherActor))

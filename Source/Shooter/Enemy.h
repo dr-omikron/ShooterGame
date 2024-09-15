@@ -52,6 +52,18 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void StoreHitNumber(UUserWidget* HitNumber, FVector Location);
 
+	UFUNCTION(BlueprintCallable)
+	void ActivateRightWeapon() const;
+
+	UFUNCTION(BlueprintCallable)
+	void DeactivateRightWeapon() const;
+
+	UFUNCTION(BlueprintCallable)
+	void ActivateLeftWeapon() const;
+
+	UFUNCTION(BlueprintCallable)
+	void DeactivateLeftWeapon() const;
+	
 	UFUNCTION()
 	void DestroyHitNumber(UUserWidget* HitNumber);
 
@@ -79,7 +91,7 @@ protected:
 	void PlayHitMontage(FName Section, float PlayRate = 1.f);
 	void ResetHitReactTimer();
 	void UpdateHitNumbers();
-	
+		
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* ImpactParticle;
