@@ -2,8 +2,10 @@
 #include "Enemy.h"
 
 #include "EnemyAIController.h"
+#include "ShooterCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Sound/SoundCue.h"
@@ -19,14 +21,20 @@ AEnemy::AEnemy():
 	HitReactTimeMax(3.f),
 	HitNumberDestroyTime(1.5f),
 	BehaviorTree(nullptr),
-	bCanHitReact(true)
+	bCanHitReact(true),
+	bStunned(false),
+	StunChance(0.5f)
+	
 {
 	PrimaryActorTick.bCanEverTick = true;
+	AgroSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Agro Sphere"));
+	AgroSphere->SetupAttachment(GetRootComponent());
 }
 
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+	AgroSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::AgroSphereOverlap);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	EnemyAIController = Cast<AEnemyAIController>(GetController());
 	if(EnemyAIController)
@@ -54,6 +62,16 @@ void AEnemy::UpdateHitNumbers()
 		FVector2D ScreenPosition(0.f);
 		UGameplayStatics::ProjectWorldToScreen(GetWorld()->GetFirstPlayerController(), Location, ScreenPosition);
 		HitNumber->SetPositionInViewport(ScreenPosition);
+	}
+}
+
+void AEnemy::AgroSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if(OtherActor == nullptr) return;
+	if(const auto Character = Cast<AShooterCharacter>(OtherActor))
+	{
+		EnemyAIController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), Character);
 	}
 }
 
@@ -116,7 +134,12 @@ void AEnemy::BulletHit_Implementation(FHitResult HitResult)
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, FRotator(0.f), true);
 	}
 	ShowHealthBar();
-	PlayHitMontage(FName("HitReactFront"));
+	if(const float Stunned = FMath::FRandRange(0.f, 1.f); Stunned <= StunChance)
+	{
+		PlayHitMontage(FName("HitReactFront"));
+		bStunned = true;
+	}
+	
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,

@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
 
+class USphereComponent;
 class AEnemyAIController;
 class UBehaviorTree;
 class USoundCue;
@@ -43,6 +44,10 @@ protected:
 
 	UFUNCTION()
 	void DestroyHitNumber(UUserWidget* HitNumber);
+
+	UFUNCTION()	
+	void AgroSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+		 int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
 	void Die();
 	void PlayHitMontage(FName Section, float PlayRate = 1.f);
@@ -91,6 +96,15 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true", MakeEditWidget = "true"))
 	FVector PatrolPoint2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	USphereComponent* AgroSphere;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	bool bStunned;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float StunChance;
 	
 	UPROPERTY()
 	AEnemyAIController* EnemyAIController;
