@@ -29,6 +29,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowHitNumber(int32 Damage, FVector HitLocation, bool bHeadShot);
+
+	UFUNCTION(BlueprintCallable)
+	void SetStunned(bool Stunned);
 		
 protected:
 	virtual void BeginPlay() override;

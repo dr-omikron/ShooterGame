@@ -21,14 +21,19 @@ AEnemy::AEnemy():
 	HitReactTimeMax(3.f),
 	HitNumberDestroyTime(1.5f),
 	BehaviorTree(nullptr),
-	bCanHitReact(true),
 	bStunned(false),
-	StunChance(0.5f)
-	
+	StunChance(0.5f),
+	bCanHitReact(true)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	AgroSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Agro Sphere"));
 	AgroSphere->SetupAttachment(GetRootComponent());
+}
+
+void AEnemy::SetStunned(const bool Stunned)
+{
+	bStunned = Stunned;
+	EnemyAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("Stunned"), bStunned);
 }
 
 void AEnemy::BeginPlay()
@@ -84,7 +89,7 @@ void AEnemy::StoreHitNumber(UUserWidget* HitNumber, const FVector Location)
 	GetWorldTimerManager().SetTimer(HitNumberTimer, HitNumberDelegate, HitNumberDestroyTime, false);
 }
 
-void AEnemy::PlayHitMontage(FName Section, float PlayRate)
+void AEnemy::PlayHitMontage(const FName Section, const float PlayRate)
 {
 	if(bCanHitReact)
 	{
@@ -137,7 +142,7 @@ void AEnemy::BulletHit_Implementation(FHitResult HitResult)
 	if(const float Stunned = FMath::FRandRange(0.f, 1.f); Stunned <= StunChance)
 	{
 		PlayHitMontage(FName("HitReactFront"));
-		bStunned = true;
+		SetStunned(true);
 	}
 	
 }
