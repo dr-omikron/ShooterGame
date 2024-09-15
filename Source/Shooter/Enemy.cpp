@@ -26,6 +26,7 @@ AEnemy::AEnemy():
 	BehaviorTree(nullptr),
 	bStunned(false),
 	StunChance(0.5f),
+	BaseDamage(20.f),
 	AttackLFast(TEXT("AttackLFast")),
 	AttackRFast(TEXT("AttackRFast")),
 	AttackL(TEXT("AttackL")),
@@ -96,6 +97,15 @@ void AEnemy::UpdateHitNumbers()
 	}
 }
 
+void AEnemy::DoDamage(AActor* DamagedActor)
+{
+	if(DamagedActor == nullptr) return;
+	if(const auto Character = Cast<AShooterCharacter>(DamagedActor))
+	{
+		UGameplayStatics::ApplyDamage(Character, BaseDamage, EnemyAIController, this, UDamageType::StaticClass());
+	}
+}
+
 void AEnemy::ActivateRightWeapon() const
 {
 	RightWeaponCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -161,12 +171,13 @@ void AEnemy::CombatRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 void AEnemy::LeftWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	
+	DoDamage(OtherActor);
 }
 
 void AEnemy::RightWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	DoDamage(OtherActor);
 }
 
 void AEnemy::StoreHitNumber(UUserWidget* HitNumber, const FVector Location)

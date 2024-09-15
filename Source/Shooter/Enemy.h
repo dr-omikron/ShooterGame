@@ -91,6 +91,7 @@ protected:
 	void PlayHitMontage(FName Section, float PlayRate = 1.f);
 	void ResetHitReactTimer();
 	void UpdateHitNumbers();
+	void DoDamage(AActor* DamagedActor);
 		
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
@@ -153,6 +154,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float StunChance;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float BaseDamage;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* LeftWeaponCollision;
 

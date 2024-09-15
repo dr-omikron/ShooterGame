@@ -59,6 +59,8 @@ AShooterCharacter::AShooterCharacter()
 	PickupSoundResetTime = 0.2f;
 	EquipSoundResetTime = 0.2f;
 	HighlightedSlot = -1;
+	Health = 100.f;
+	MaxHealth = 100.f;
 	
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -521,6 +523,21 @@ void AShooterCharacter::Jump()
 	{
 		ACharacter::Jump();
 	}
+}
+
+float AShooterCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	if(Health - DamageAmount <= 0.f)
+	{
+		Health = 0.f;
+	}
+	else
+	{
+		Health -= DamageAmount;
+	}
+	return DamageAmount;
 }
 
 
