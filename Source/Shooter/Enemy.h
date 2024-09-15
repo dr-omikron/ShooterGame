@@ -35,6 +35,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void PlayAttackMontage(FName Section, float PlayRate = 1.f) const;
+
+	UFUNCTION(BlueprintPure)
+	FName GetAttackSectionName() const;
 		
 protected:
 	virtual void BeginPlay() override;

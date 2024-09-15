@@ -5,6 +5,7 @@
 #include "ShooterCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -46,6 +47,9 @@ void AEnemy::BeginPlay()
 	CombatRangeSphere->OnComponentEndOverlap.AddDynamic(this, &AEnemy::CombatRangeEndOverlap);
 
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	
 	EnemyAIController = Cast<AEnemyAIController>(GetController());
 
 	if(EnemyAIController)
@@ -82,7 +86,10 @@ void AEnemy::AgroSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	if(OtherActor == nullptr) return;
 	if(const auto Character = Cast<AShooterCharacter>(OtherActor))
 	{
-		EnemyAIController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), Character);
+		if(EnemyAIController)
+		{
+			EnemyAIController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), Character);
+		}
 	}
 }
 
@@ -152,6 +159,28 @@ void AEnemy::PlayAttackMontage(const FName Section, const float PlayRate) const
 		AnimInstance->Montage_Play(AttackMontage, PlayRate);
 		AnimInstance->Montage_JumpToSection(Section, AttackMontage);
 	}
+}
+
+FName AEnemy::GetAttackSectionName() const
+{
+	FName SectionName;
+	switch (FMath::RandRange(1, 4))
+	{
+	case 1:
+		SectionName = AttackLFast;
+		break;
+	case 2:
+		SectionName = AttackRFast;
+		break;
+	case 3:
+		SectionName = AttackL;
+		break;
+	case 4:
+		SectionName = AttackR;
+		break;
+	default:;
+	}
+	return SectionName;
 }
 
 void AEnemy::ResetHitReactTimer()
