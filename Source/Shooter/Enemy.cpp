@@ -103,6 +103,10 @@ void AEnemy::DoDamage(AActor* DamagedActor)
 	if(const auto Character = Cast<AShooterCharacter>(DamagedActor))
 	{
 		UGameplayStatics::ApplyDamage(Character, BaseDamage, EnemyAIController, this, UDamageType::StaticClass());
+		if(Character->GetMeleeImpactSound())
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, Character->GetMeleeImpactSound(), GetActorLocation());
+		}
 	}
 }
 
@@ -165,7 +169,6 @@ void AEnemy::CombatRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 			EnemyAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("InAttackRange"), bInAttackRange);
 		}
 	}
-	
 }
 
 void AEnemy::LeftWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
