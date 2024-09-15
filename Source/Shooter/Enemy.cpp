@@ -8,6 +8,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Sound/SoundCue.h"
@@ -31,7 +32,9 @@ AEnemy::AEnemy():
 	AttackRFast(TEXT("AttackRFast")),
 	AttackL(TEXT("AttackL")),
 	AttackR(TEXT("AttackR")),
-	bCanHitReact(true)
+	bCanHitReact(true),
+	LeftWeaponSocket(TEXT("FX_Trail_L_01")),
+	RightWeaponSocket(TEXT("FX_Trail_R_01"))
 {
 	PrimaryActorTick.bCanEverTick = true;
 	AgroSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Agro Sphere"));
@@ -97,15 +100,23 @@ void AEnemy::UpdateHitNumbers()
 	}
 }
 
-void AEnemy::DoDamage(AActor* DamagedActor)
+void AEnemy::DoDamage(AShooterCharacter* DamagedActor)
 {
-	if(DamagedActor == nullptr) return;
-	if(const auto Character = Cast<AShooterCharacter>(DamagedActor))
+	UGameplayStatics::ApplyDamage(DamagedActor, BaseDamage, EnemyAIController, this, UDamageType::StaticClass());
+	if(DamagedActor->GetMeleeImpactSound())
 	{
-		UGameplayStatics::ApplyDamage(Character, BaseDamage, EnemyAIController, this, UDamageType::StaticClass());
-		if(Character->GetMeleeImpactSound())
+		UGameplayStatics::PlaySoundAtLocation(this, DamagedActor->GetMeleeImpactSound(), GetActorLocation());
+	}
+}
+
+void AEnemy::SpawnBlood(const AShooterCharacter* DamagedActor, const FName SocketName) const
+{
+	if(const USkeletalMeshSocket* TipSocket = GetMesh()->GetSocketByName(SocketName))
+	{
+		const FTransform SocketTransform = TipSocket->GetSocketTransform(GetMesh());
+		if(DamagedActor->GetBloodParticles())
 		{
-			UGameplayStatics::PlaySoundAtLocation(this, Character->GetMeleeImpactSound(), GetActorLocation());
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DamagedActor->GetBloodParticles(), SocketTransform);
 		}
 	}
 }
@@ -147,7 +158,7 @@ void AEnemy::CombatRangeOverlap(UPrimitiveComponent* OverlappedComponent, AActor
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if(OtherActor == nullptr) return;
-	if(auto ShooterCharacter = Cast<AShooterCharacter>(OtherActor))
+	if(Cast<AShooterCharacter>(OtherActor))
 	{
 		bInAttackRange = true;
 		if(EnemyAIController)
@@ -161,7 +172,7 @@ void AEnemy::CombatRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if(OtherActor == nullptr) return;
-	if(auto ShooterCharacter = Cast<AShooterCharacter>(OtherActor))
+	if(Cast<AShooterCharacter>(OtherActor))
 	{
 		bInAttackRange = false;
 		if(EnemyAIController)
@@ -174,13 +185,23 @@ void AEnemy::CombatRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 void AEnemy::LeftWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	DoDamage(OtherActor);
+	if(OtherActor == nullptr) return;
+	if(const auto Character = Cast<AShooterCharacter>(OtherActor))
+	{
+		DoDamage(Character);
+		SpawnBlood(Character, LeftWeaponSocket);
+	}
 }
 
 void AEnemy::RightWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	DoDamage(OtherActor);
+	if(OtherActor == nullptr) return;
+	if(const auto Character = Cast<AShooterCharacter>(OtherActor))
+	{
+		DoDamage(Character);
+		SpawnBlood(Character, RightWeaponSocket);
+	}
 }
 
 void AEnemy::StoreHitNumber(UUserWidget* HitNumber, const FVector Location)

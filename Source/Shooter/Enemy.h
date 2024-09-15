@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
 
+class AShooterCharacter;
 class UBoxComponent;
 class USphereComponent;
 class AEnemyAIController;
@@ -91,8 +92,8 @@ protected:
 	void PlayHitMontage(FName Section, float PlayRate = 1.f);
 	void ResetHitReactTimer();
 	void UpdateHitNumbers();
-	void DoDamage(AActor* DamagedActor);
-		
+	void DoDamage(AShooterCharacter* DamagedActor);
+	void SpawnBlood(const AShooterCharacter* DamagedActor, FName SocketName) const;	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* ImpactParticle;
@@ -163,6 +164,12 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* RightWeaponCollision;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	FName LeftWeaponSocket;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	FName RightWeaponSocket;
+	
 	UPROPERTY()
 	AEnemyAIController* EnemyAIController;
 	
