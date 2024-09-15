@@ -1,6 +1,8 @@
 
 #include "Enemy.h"
 
+#include "EnemyAIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -26,7 +28,13 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-	FVector WorldPatrolPoint = UKismetMathLibrary::TransformLocation(GetActorTransform(), PatrolPoint);
+	EnemyAIController = Cast<AEnemyAIController>(GetController());
+	if(EnemyAIController)
+	{
+		const FVector WorldPatrolPoint = UKismetMathLibrary::TransformLocation(GetActorTransform(), PatrolPoint);
+		EnemyAIController->GetBlackboardComponent()->SetValueAsVector(TEXT("PatrolPoint"), WorldPatrolPoint);
+		EnemyAIController->RunBehaviorTree(BehaviorTree);
+	}
 }
 
 void AEnemy::Tick(float DeltaTime)

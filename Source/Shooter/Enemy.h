@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
 
+class AEnemyAIController;
 class UBehaviorTree;
 class USoundCue;
 
@@ -87,6 +88,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true", MakeEditWidget = "true"))
 	FVector PatrolPoint;
+
+	UPROPERTY()
+	AEnemyAIController* EnemyAIController;
 	
 	bool bCanHitReact;
 	FTimerHandle HeathBarTimer;
