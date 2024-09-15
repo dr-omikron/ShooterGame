@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
 
+class UBehaviorTree;
 class USoundCue;
 
 UCLASS()
@@ -22,6 +23,7 @@ public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	FORCEINLINE FString GetHeadName() const { return HeadBone; }
+	FORCEINLINE UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowHitNumber(int32 Damage, FVector HitLocation, bool bHeadShot);
@@ -79,6 +81,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float HitNumberDestroyTime;
+
+	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
+	UBehaviorTree* BehaviorTree;
 	
 	bool bCanHitReact;
 	FTimerHandle HeathBarTimer;
