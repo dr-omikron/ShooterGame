@@ -87,8 +87,11 @@ private:
 	UBehaviorTree* BehaviorTree;
 
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true", MakeEditWidget = "true"))
-	FVector PatrolPoint;
+	FVector PatrolPoint1;
 
+	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true", MakeEditWidget = "true"))
+	FVector PatrolPoint2;
+	
 	UPROPERTY()
 	AEnemyAIController* EnemyAIController;
 	
