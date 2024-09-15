@@ -84,6 +84,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
 	UBehaviorTree* BehaviorTree;
+
+	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true", MakeEditWidget = "true"))
+	FVector PatrolPoint;
 	
 	bool bCanHitReact;
 	FTimerHandle HeathBarTimer;

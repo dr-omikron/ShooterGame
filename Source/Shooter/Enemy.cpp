@@ -3,6 +3,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Sound/SoundCue.h"
 
 AEnemy::AEnemy():
@@ -15,9 +16,35 @@ AEnemy::AEnemy():
 	HitReactTimeMin(0.5f),
 	HitReactTimeMax(3.f),
 	HitNumberDestroyTime(1.5f),
+	BehaviorTree(nullptr),
 	bCanHitReact(true)
 {
 	PrimaryActorTick.bCanEverTick = true;
+}
+
+void AEnemy::BeginPlay()
+{
+	Super::BeginPlay();
+	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	FVector WorldPatrolPoint = UKismetMathLibrary::TransformLocation(GetActorTransform(), PatrolPoint);
+}
+
+void AEnemy::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	UpdateHitNumbers();
+}
+
+void AEnemy::UpdateHitNumbers()
+{
+	for(const auto& HitPair : HitNumbers)
+	{
+		UUserWidget* HitNumber = HitPair.Key;
+		const FVector Location = HitPair.Value;
+		FVector2D ScreenPosition(0.f);
+		UGameplayStatics::ProjectWorldToScreen(GetWorld()->GetFirstPlayerController(), Location, ScreenPosition);
+		HitNumber->SetPositionInViewport(ScreenPosition);
+	}
 }
 
 void AEnemy::StoreHitNumber(UUserWidget* HitNumber, const FVector Location)
@@ -27,11 +54,6 @@ void AEnemy::StoreHitNumber(UUserWidget* HitNumber, const FVector Location)
 	FTimerDelegate HitNumberDelegate;
 	HitNumberDelegate.BindUFunction(this, FName("DestroyHitNumber"), HitNumber);
 	GetWorldTimerManager().SetTimer(HitNumberTimer, HitNumberDelegate, HitNumberDestroyTime, false);
-}
-
-void AEnemy::Die()
-{
-	HideHealthBar();
 }
 
 void AEnemy::PlayHitMontage(FName Section, float PlayRate)
@@ -60,35 +82,12 @@ void AEnemy::DestroyHitNumber(UUserWidget* HitNumber)
 	HitNumber->RemoveFromParent();
 }
 
-void AEnemy::UpdateHitNumbers()
-{
-	for(const auto& HitPair : HitNumbers)
-	{
-		UUserWidget* HitNumber = HitPair.Key;
-		const FVector Location = HitPair.Value;
-		FVector2D ScreenPosition(0.f);
-		UGameplayStatics::ProjectWorldToScreen(GetWorld()->GetFirstPlayerController(), Location, ScreenPosition);
-		HitNumber->SetPositionInViewport(ScreenPosition);
-	}
-}
-
-void AEnemy::BeginPlay()
-{
-	Super::BeginPlay();
-	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-}
-
 void AEnemy::ShowHealthBar_Implementation()
 {
 	GetWorldTimerManager().ClearTimer(HeathBarTimer);
 	GetWorldTimerManager().SetTimer(HeathBarTimer, this, &AEnemy::HideHealthBar, HealthBarDisplayTime);
 }
 
-void AEnemy::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	UpdateHitNumbers();
-}
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -128,3 +127,8 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	return DamageAmount;
 }
 
+
+void AEnemy::Die()
+{
+	HideHealthBar();
+}
