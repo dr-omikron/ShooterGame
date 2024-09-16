@@ -347,6 +347,11 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	if(EnemyAIController)
+	{
+		EnemyAIController->GetBlackboardComponent()->SetValueAsObject(FName(TEXT("Target")), DamageCauser);
+	}
+	
 	if(Health - DamageAmount <= 0.f)
 	{
 		Health = 0.f;
