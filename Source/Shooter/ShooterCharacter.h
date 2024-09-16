@@ -25,6 +25,7 @@ enum class ECombatStates : uint8
 	ECS_FireTimerInProgress UMETA(DisplayName = "FireTimerInProgress"),
 	ECS_Reloading UMETA(DisplayName = "Reloading"),
 	ECS_Equipping UMETA(DisplayName = "Equipping"),
+	ECS_Stunned UMETA(DisplayName = "Stunned"),
 	ECS_MAX UMETA(DisplayName = "DefaultMAX")
 };
 
@@ -61,6 +62,7 @@ public:
 	FORCEINLINE AWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
 	FORCEINLINE USoundCue* GetMeleeImpactSound() const { return MeleeImpactSound; }
 	FORCEINLINE UParticleSystem* GetBloodParticles() const { return BloodParticles; }
+	FORCEINLINE float GetStunChance() const { return StunChance; }
 		
 	FInterpLocation GetInterpLocation(int32 Index) const;	
 
@@ -92,7 +94,8 @@ public:
 	void StartPickupSoundTimer();
 	void StartEquipSoundTimer();
 	void UnhighlightInventorySlot();
-		
+	void Stun();
+	
 protected:
 	UFUNCTION()
 	void FinishCrosshairBulletFire();
@@ -108,6 +111,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void FinishEquipping();
+
+	UFUNCTION(BlueprintCallable)
+	void EndStun();
 
 	UFUNCTION(BlueprintCallable)
 	void GrabClip();
@@ -203,6 +209,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* EquipMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* HitReactMontage;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	bool bAiming;
@@ -227,6 +236,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* BloodParticles;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float StunChance;
 	
 	//Items
 	

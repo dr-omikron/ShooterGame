@@ -93,7 +93,9 @@ protected:
 	void ResetHitReactTimer();
 	void UpdateHitNumbers();
 	void DoDamage(AShooterCharacter* DamagedActor);
-	void SpawnBlood(const AShooterCharacter* DamagedActor, FName SocketName) const;	
+	void SpawnBlood(const AShooterCharacter* DamagedActor, FName SocketName) const;
+	void StunCharacter(AShooterCharacter* DamagedActor);
+	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* ImpactParticle;

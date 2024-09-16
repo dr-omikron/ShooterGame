@@ -61,6 +61,7 @@ AShooterCharacter::AShooterCharacter()
 	HighlightedSlot = -1;
 	Health = 100.f;
 	MaxHealth = 100.f;
+	StunChance = 0.25f;
 	
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -274,7 +275,7 @@ bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, 
 void AShooterCharacter::AimingButtonPressed()
 {
 	bAimingButtonPressed = true;
-	if(CombatStates != ECombatStates::ECS_Reloading && CombatStates != ECombatStates::ECS_Equipping)
+	if(CombatStates != ECombatStates::ECS_Reloading && CombatStates != ECombatStates::ECS_Equipping && CombatStates != ECombatStates::ECS_Stunned)
 	{
 		Aim();
 	}
@@ -310,6 +311,7 @@ void AShooterCharacter::FireButtonPressed()
 
 void AShooterCharacter::AutoFireReset()
 {
+	if(CombatStates == ECombatStates::ECS_Stunned) return;
 	CombatStates = ECombatStates::ECS_Unoccupied;
 	if(EquippedWeapon == nullptr) return;
 	if(WeaponHasAmmo())
@@ -338,6 +340,7 @@ EPhysicalSurface AShooterCharacter::GetSurfaceType()
 
 void AShooterCharacter::FinishReloading()
 {
+	if(CombatStates == ECombatStates::ECS_Stunned) return;
 	CombatStates = ECombatStates::ECS_Unoccupied;
 	if(bAimingButtonPressed) Aim();
 	if(EquippedWeapon == nullptr) return;
@@ -362,6 +365,13 @@ void AShooterCharacter::FinishReloading()
 }
 
 void AShooterCharacter::FinishEquipping()
+{
+	if(CombatStates == ECombatStates::ECS_Stunned) return;
+	CombatStates = ECombatStates::ECS_Unoccupied;
+	if(bAimingButtonPressed) Aim();
+}
+
+void AShooterCharacter::EndStun()
 {
 	CombatStates = ECombatStates::ECS_Unoccupied;
 	if(bAimingButtonPressed) Aim();
@@ -829,6 +839,16 @@ void AShooterCharacter::UnhighlightInventorySlot()
 {
 	HighlightIconDelegate.Broadcast(HighlightedSlot, false);
 	HighlightedSlot = -1;
+}
+
+void AShooterCharacter::Stun()
+{
+	CombatStates = ECombatStates::ECS_Stunned;
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if(AnimInstance && HitReactMontage)
+	{
+		AnimInstance->Montage_Play(HitReactMontage);
+	}
 }
 
 //Crosshair

@@ -121,6 +121,17 @@ void AEnemy::SpawnBlood(const AShooterCharacter* DamagedActor, const FName Socke
 	}
 }
 
+void AEnemy::StunCharacter(AShooterCharacter* DamagedActor)
+{
+	if(DamagedActor)
+	{
+		if(FMath::FRandRange(0.f, 1.f) <= DamagedActor->GetStunChance())
+		{
+			DamagedActor->Stun();
+		}
+	}
+}
+
 void AEnemy::ActivateRightWeapon() const
 {
 	RightWeaponCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -190,6 +201,7 @@ void AEnemy::LeftWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	{
 		DoDamage(Character);
 		SpawnBlood(Character, LeftWeaponSocket);
+		StunCharacter(Character);
 	}
 }
 
@@ -201,6 +213,7 @@ void AEnemy::RightWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor
 	{
 		DoDamage(Character);
 		SpawnBlood(Character, RightWeaponSocket);
+		StunCharacter(Character);
 	}
 }
 
