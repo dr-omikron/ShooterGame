@@ -36,7 +36,7 @@ public:
 	void SetStunned(bool Stunned);
 
 	UFUNCTION(BlueprintCallable)
-	void PlayAttackMontage(FName Section, float PlayRate = 1.f) const;
+	void PlayAttackMontage(FName Section, float PlayRate = 1.f);
 
 	UFUNCTION(BlueprintPure)
 	FName GetAttackSectionName() const;
@@ -95,6 +95,7 @@ protected:
 	void DoDamage(AShooterCharacter* DamagedActor);
 	void SpawnBlood(const AShooterCharacter* DamagedActor, FName SocketName) const;
 	void StunCharacter(AShooterCharacter* DamagedActor);
+	void ResetCanAttack();
 	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
@@ -171,6 +172,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	FName RightWeaponSocket;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float ResetTimeAttack;
+
+	UPROPERTY(VisibleAnywhere, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	bool bCanAttack;
 	
 	UPROPERTY()
 	AEnemyAIController* EnemyAIController;
@@ -182,4 +189,5 @@ private:
 	bool bCanHitReact;
 	FTimerHandle HeathBarTimer;
 	FTimerHandle HitReactTimer;
+	FTimerHandle AttackWaitTimer;
 };

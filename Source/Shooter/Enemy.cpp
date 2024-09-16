@@ -34,7 +34,9 @@ AEnemy::AEnemy():
 	AttackR(TEXT("AttackR")),
 	bCanHitReact(true),
 	LeftWeaponSocket(TEXT("FX_Trail_L_01")),
-	RightWeaponSocket(TEXT("FX_Trail_R_01"))
+	RightWeaponSocket(TEXT("FX_Trail_R_01")),
+	bCanAttack(true),
+	ResetTimeAttack(1.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	AgroSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Agro Sphere"));
@@ -74,12 +76,16 @@ void AEnemy::BeginPlay()
 
 	if(EnemyAIController)
 	{
+		EnemyAIController->GetBlackboardComponent()->SetValueAsBool(FName(TEXT("CanAttack")), true);
+		
 		const FVector WorldPatrolPoint1 = UKismetMathLibrary::TransformLocation(GetActorTransform(), PatrolPoint1);
 		const FVector WorldPatrolPoint2 = UKismetMathLibrary::TransformLocation(GetActorTransform(), PatrolPoint2);
 		EnemyAIController->GetBlackboardComponent()->SetValueAsVector(TEXT("PatrolPoint1"), WorldPatrolPoint1);
 		EnemyAIController->GetBlackboardComponent()->SetValueAsVector(TEXT("PatrolPoint2"), WorldPatrolPoint2);
 		EnemyAIController->RunBehaviorTree(BehaviorTree);
 	}
+	
+	
 }
 
 void AEnemy::Tick(float DeltaTime)
@@ -129,6 +135,15 @@ void AEnemy::StunCharacter(AShooterCharacter* DamagedActor)
 		{
 			DamagedActor->Stun();
 		}
+	}
+}
+
+void AEnemy::ResetCanAttack()
+{
+	bCanAttack = true;
+	if(EnemyAIController)
+	{
+		EnemyAIController->GetBlackboardComponent()->SetValueAsBool(FName(TEXT("CanAttack")), bCanAttack);
 	}
 }
 
@@ -247,12 +262,18 @@ void AEnemy::SetStunned(const bool Stunned)
 	EnemyAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("Stunned"), bStunned);
 }
 
-void AEnemy::PlayAttackMontage(const FName Section, const float PlayRate) const
+void AEnemy::PlayAttackMontage(const FName Section, const float PlayRate)
 {
 	if(UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance(); AnimInstance && AttackMontage)
 	{
 		AnimInstance->Montage_Play(AttackMontage, PlayRate);
 		AnimInstance->Montage_JumpToSection(Section, AttackMontage);
+	}
+	bCanAttack = false;
+	GetWorldTimerManager().SetTimer(AttackWaitTimer, this, &AEnemy::ResetCanAttack, ResetTimeAttack);
+	if(EnemyAIController)
+	{
+		EnemyAIController->GetBlackboardComponent()->SetValueAsBool(FName(TEXT("CanAttack")), bCanAttack);
 	}
 }
 
