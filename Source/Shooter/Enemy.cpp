@@ -28,15 +28,17 @@ AEnemy::AEnemy():
 	bStunned(false),
 	StunChance(0.5f),
 	BaseDamage(20.f),
+	LeftWeaponSocket(TEXT("FX_Trail_L_01")),
+	RightWeaponSocket(TEXT("FX_Trail_R_01")),
+	ResetTimeAttack(1.f),
+	DeathTime(4.f),
+	bCanAttack(true),
 	AttackLFast(TEXT("AttackLFast")),
 	AttackRFast(TEXT("AttackRFast")),
 	AttackL(TEXT("AttackL")),
 	AttackR(TEXT("AttackR")),
-	bCanHitReact(true),
-	LeftWeaponSocket(TEXT("FX_Trail_L_01")),
-	RightWeaponSocket(TEXT("FX_Trail_R_01")),
-	bCanAttack(true),
-	ResetTimeAttack(1.f)
+	bDying(false),
+	bCanHitReact(true)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	AgroSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Agro Sphere"));
@@ -333,13 +335,14 @@ void AEnemy::BulletHit_Implementation(FHitResult HitResult)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, FRotator(0.f), true);
 	}
+
+	if(bDying) return;
 	ShowHealthBar();
-	if(const float Stunned = FMath::FRandRange(0.f, 1.f); Stunned <= StunChance)
+	if(FMath::FRandRange(0.f, 1.f) <= StunChance)
 	{
 		PlayHitMontage(FName("HitReactFront"));
 		SetStunned(true);
 	}
-	
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
@@ -365,8 +368,30 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	return DamageAmount;
 }
 
-
 void AEnemy::Die()
 {
+	if(bDying) return;
+	bDying = true;
 	HideHealthBar();
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if(AnimInstance && DeathMontage)
+	{
+		AnimInstance->Montage_Play(DeathMontage);
+	}
+	if(EnemyAIController)
+	{
+		EnemyAIController->GetBlackboardComponent()->SetValueAsBool(FName(TEXT("Dead")), true);
+		EnemyAIController->StopMovement();
+	}
+}
+
+void AEnemy::FinishDead()
+{
+	GetMesh()->bPauseAnims = true;
+	GetWorldTimerManager().SetTimer(DeathTimer, this, &AEnemy::DestroyEnemy, DeathTime);
+}
+
+void AEnemy::DestroyEnemy()
+{
+	Destroy();
 }

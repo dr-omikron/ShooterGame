@@ -57,6 +57,9 @@ protected:
 	void ActivateRightWeapon() const;
 
 	UFUNCTION(BlueprintCallable)
+	void FinishDead();
+
+	UFUNCTION(BlueprintCallable)
 	void DeactivateRightWeapon() const;
 
 	UFUNCTION(BlueprintCallable)
@@ -68,6 +71,9 @@ protected:
 	UFUNCTION()
 	void DestroyHitNumber(UUserWidget* HitNumber);
 
+	UFUNCTION()
+	void DestroyEnemy();
+	
 	UFUNCTION()	
 	void AgroSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		 int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -96,7 +102,7 @@ protected:
 	void SpawnBlood(const AShooterCharacter* DamagedActor, FName SocketName) const;
 	void StunCharacter(AShooterCharacter* DamagedActor);
 	void ResetCanAttack();
-	
+		
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* ImpactParticle;
@@ -106,6 +112,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* DeathMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	USoundCue* ImpactSound;
@@ -176,6 +185,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float ResetTimeAttack;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float DeathTime;
+
 	UPROPERTY(VisibleAnywhere, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	bool bCanAttack;
 	
@@ -186,8 +198,10 @@ private:
 	FName AttackRFast;
 	FName AttackL;
 	FName AttackR;
+	bool bDying;
 	bool bCanHitReact;
 	FTimerHandle HeathBarTimer;
 	FTimerHandle HitReactTimer;
 	FTimerHandle AttackWaitTimer;
+	FTimerHandle DeathTimer;
 };
