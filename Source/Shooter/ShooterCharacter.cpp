@@ -4,8 +4,11 @@
 #include "Ammo.h"
 #include "BulletHitInterface.h"
 #include "Enemy.h"
+#include "EnemyAIController.h"
 #include "ItemBase.h"
+#include "ShooterPlayerController.h"
 #include "Weapon.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
@@ -538,10 +541,18 @@ void AShooterCharacter::Jump()
 float AShooterCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
 	AActor* DamageCauser)
 {
-	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	if(Health - DamageAmount <= 0.f)
 	{
 		Health = 0.f;
+		Die();
+		if(const AEnemyAIController* EnemyController = Cast<AEnemyAIController>(EventInstigator))
+		{
+			EnemyController->GetBlackboardComponent()->SetValueAsBool(FName(TEXT("CharacterDead")), true);
+		}
+		if(const AShooterPlayerController* PlayerController = Cast<AShooterPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
+		{
+			PlayerController->ClearInputContext();
+		}
 	}
 	else
 	{
@@ -550,6 +561,19 @@ float AShooterCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	return DamageAmount;
 }
 
+void AShooterCharacter::Die() const
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if(AnimInstance && DeathMontage)
+	{
+		AnimInstance->Montage_Play(DeathMontage);
+	}
+}
+
+void AShooterCharacter::FinishDeath()
+{
+	GetMesh()->bPauseAnims = true;
+}
 
 void AShooterCharacter::InterpCapsuleHalfHeight(float DeltaTime) const
 {
@@ -690,7 +714,7 @@ void AShooterCharacter::TraceForItems()
 		if(TraceUnderCrosshair(ItemTraceResult, HitLocation))
 		{
 			TraceHitItem = Cast<AItemBase>(ItemTraceResult.GetActor());
-			if(const auto TraceHitWeapon = Cast<AWeapon>(TraceHitItem))
+			if(Cast<AWeapon>(TraceHitItem))
 			{
 				if(HighlightedSlot == -1)
 				{
@@ -740,15 +764,6 @@ void AShooterCharacter::TraceForItems()
 }
 
 //Camera
-
-/*
-FVector AShooterCharacter::GetCameraInterpLocation() const
-{
-	const FVector CameraWorldLocation = FollowCamera->GetComponentLocation();
-	const FVector CameraForward = FollowCamera->GetForwardVector();
-	return CameraWorldLocation + CameraForward * CameraInterpDistance + FVector(0.f, 0.f, CameraInterpElevation);
-}
-*/
 
 void AShooterCharacter::CameraInterpZoom(float DeltaTime)
 {
@@ -843,6 +858,7 @@ void AShooterCharacter::UnhighlightInventorySlot()
 
 void AShooterCharacter::Stun()
 {
+	if(Health <= 0.f) return;
 	CombatStates = ECombatStates::ECS_Stunned;
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if(AnimInstance && HitReactMontage)

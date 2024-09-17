@@ -16,19 +16,14 @@ AShooterPlayerController::AShooterPlayerController()
 	AimingLookUpRate = 0.6f;
 	ShooterCharacter = nullptr;
 	HUDOverlay = nullptr;
+	Subsystem = nullptr;
 }
 
 void AShooterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	check(ShooterContext);
-
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-
-	check(Subsystem);
-	Subsystem->AddMappingContext(ShooterContext, 0);
-
+	SetupInputContext();
 	ShooterCharacter = Cast<AShooterCharacter>(GetCharacter());
 	check(ShooterCharacter);
 
@@ -41,6 +36,18 @@ void AShooterPlayerController::BeginPlay()
 			HUDOverlay->SetVisibility(ESlateVisibility::Visible);
 		}
 	}
+}
+
+void AShooterPlayerController::SetupInputContext()
+{
+	check(ShooterContext);
+	Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+	Subsystem->AddMappingContext(ShooterContext, 0);
+}
+
+void AShooterPlayerController::ClearInputContext() const
+{
+	if(Subsystem) Subsystem->ClearAllMappings();
 }
 
 void AShooterPlayerController::PlayerTick(float DeltaTime)

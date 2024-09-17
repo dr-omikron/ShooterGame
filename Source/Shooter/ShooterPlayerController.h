@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "ShooterPlayerController.generated.h"
 
+class UEnhancedInputLocalPlayerSubsystem;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
@@ -17,6 +18,8 @@ class SHOOTER_API AShooterPlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	AShooterPlayerController();
+	void SetupInputContext();
+	void ClearInputContext() const;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -95,6 +98,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Widgets", meta = (AllowPrivateAccess = "true"))
 	UUserWidget* HUDOverlay;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UEnhancedInputLocalPlayerSubsystem* Subsystem;
 	
 	void Move(const FInputActionValue& InputActionValue);
 	void CameraMovement(const FInputActionValue& InputActionValue);

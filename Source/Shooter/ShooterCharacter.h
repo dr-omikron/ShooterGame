@@ -68,7 +68,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float GetCrosshairSpreadMultiplayer() const { return CrosshairSpreadMultiplayer; }
-	//FVector GetCameraInterpLocation() const;
 	void FireWeapon();
 	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FHitResult& OutHitResult) const;
 	void AimingButtonPressed();
@@ -110,6 +109,9 @@ protected:
 	void FinishReloading();
 
 	UFUNCTION(BlueprintCallable)
+	void FinishDeath();
+
+	UFUNCTION(BlueprintCallable)
 	void FinishEquipping();
 
 	UFUNCTION(BlueprintCallable)
@@ -147,7 +149,7 @@ protected:
 	void ExchangeInventoryItems(const int32 CurrentItemIndex, const int32 NewItemIndex);
 	int32 GetEmptyInventorySlot();
 	void HighlightInventorySlot();
-	
+	void Die() const;
 		
 private:
 	// Camera
@@ -212,6 +214,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* HitReactMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* DeathMontage;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	bool bAiming;
