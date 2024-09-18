@@ -170,7 +170,8 @@ void AShooterCharacter::SendBullet() const
 			{
 				if(IBulletHitInterface* BulletHitInterface = Cast<IBulletHitInterface>(BeamHitResult.GetActor()))
 				{
-					BulletHitInterface->BulletHit_Implementation(BeamHitResult);
+					TObjectPtr<AShooterCharacter> ShooterCharacter = NewObject<AShooterCharacter>();
+					BulletHitInterface->BulletHit_Implementation(BeamHitResult, ShooterCharacter, GetController());
 				}
 				if(AEnemy* HitEnemy = Cast<AEnemy>(BeamHitResult.GetActor()))
 				{

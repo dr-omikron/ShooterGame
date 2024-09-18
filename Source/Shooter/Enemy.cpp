@@ -177,7 +177,10 @@ void AEnemy::AgroSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	{
 		if(EnemyAIController)
 		{
-			EnemyAIController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), Character);
+			if(EnemyAIController->GetBlackboardComponent())
+			{
+				EnemyAIController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), Character);	
+			}
 		}
 	}
 }
@@ -324,9 +327,9 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AEnemy::BulletHit_Implementation(FHitResult HitResult)
+void AEnemy::BulletHit_Implementation(FHitResult HitResult, AActor* Shooter, AController* ShooterController)
 {
-	IBulletHitInterface::BulletHit_Implementation(HitResult);
+	IBulletHitInterface::BulletHit_Implementation(HitResult, Shooter, ShooterController);
 	if(ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
@@ -334,14 +337,6 @@ void AEnemy::BulletHit_Implementation(FHitResult HitResult)
 	if(ImpactParticle)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, FRotator(0.f), true);
-	}
-
-	if(bDying) return;
-	ShowHealthBar();
-	if(FMath::FRandRange(0.f, 1.f) <= StunChance)
-	{
-		PlayHitMontage(FName("HitReactFront"));
-		SetStunned(true);
 	}
 }
 
@@ -364,7 +359,17 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	{
 		Health -= DamageAmount;
 	}
-	
+
+	if(!bDying)
+	{
+		ShowHealthBar();
+		if(FMath::FRandRange(0.f, 1.f) <= StunChance)
+		{
+			PlayHitMontage(FName("HitReactFront"));
+			SetStunned(true);
+		}
+	}
+
 	return DamageAmount;
 }
 

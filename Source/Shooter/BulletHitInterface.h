@@ -15,5 +15,5 @@ class SHOOTER_API IBulletHitInterface
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void BulletHit(FHitResult HitResult);
+	void BulletHit(FHitResult HitResult, AActor* Shooter, AController* ShooterController);
 };
