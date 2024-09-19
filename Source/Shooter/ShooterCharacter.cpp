@@ -65,6 +65,7 @@ AShooterCharacter::AShooterCharacter()
 	Health = 100.f;
 	MaxHealth = 100.f;
 	StunChance = 0.25f;
+	bDeath = false;
 	
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -214,7 +215,7 @@ void AShooterCharacter::SendBullet() const
 void AShooterCharacter::PlayGunFireMontage() const
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if(AnimInstance && HipFireMontage)
+	if(AnimInstance && HipFireMontage && !bDeath)
 	{
 		AnimInstance->Montage_Play(HipFireMontage);
 		AnimInstance->Montage_JumpToSection(FName("StartFire"));
@@ -545,6 +546,8 @@ float AShooterCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	if(Health - DamageAmount <= 0.f)
 	{
 		Health = 0.f;
+		bDeath = true;
+		bFireButtonPressed = false;
 		Die();
 		if(const AEnemyAIController* EnemyController = Cast<AEnemyAIController>(EventInstigator))
 		{
@@ -613,7 +616,6 @@ void AShooterCharacter::GetPickupItem(AItemBase* Item)
 	{
 		if(Inventory.Num() < INVENTORY_CAPACITY)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%i"), Inventory.Num())
 			Weapon->SetSlotIndex(Inventory.Num());
 			Inventory.Add(Weapon);
 			Weapon->SetItemState(EItemState::EIS_PickedUp);
